@@ -1,0 +1,20 @@
+[
+  {
+    "id" : 3,
+    "title" : "Cup Cake",
+    "content" : "Made of Cream-Cheese",
+    "price" : 4000
+  },
+  {
+    "id" : 4,
+    "title" : "Creme Brulee",
+    "content" : "Made of Sugar",
+    "price" : 5000
+  },
+  {
+    "id" : 5,
+    "title" : "Cheese Cake",
+    "content" : "Made of Cheese",
+    "price" : 6000
+  }
+]
