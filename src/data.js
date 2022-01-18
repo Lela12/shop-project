@@ -3,7 +3,7 @@
 export default [
   {
     id: 0,
-    title: "strawberry Eclair",
+    title: "Strawberry Eclair",
     content: "Made of Strawberry",
     price: 4000,
   },
@@ -18,7 +18,7 @@ export default [
   {
     id: 2,
     title: "Chocolate",
-    content: "Made of Kakao",
+    content: "Made of Cacao",
     price: 3000,
   },
 ];

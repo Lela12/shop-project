@@ -1,17 +1,40 @@
 /* eslint-disable */
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState, lazy, Suspense } from "react";
 import { Navbar, Nav, NavDropdown, Jumbotron, Button } from "react-bootstrap";
 import "./App.css";
+import { useHistory } from "react-router-dom";
 import Data from "./data.js";
-import Detail from "./Detail";
+// import Detail from "./Detail";
+let Detail = lazy(() => {
+  return import("./Detail.js");
+}); //<Detail>을 보여줄 때만 importDetail.js해온다.
 import axios from "axios";
 
 import { Link, Route, Switch } from "react-router-dom";
+import Cart from "./Cart";
+import Practice from "./Practice";
+
+export let 재고context = React.createContext(); //범위를 내보내겠다.
 
 function App() {
   let [dessert, dessert변경] = useState(Data);
   let [loading, loading변경] = useState(true);
   let [재고, 재고변경] = useState([10, 11, 12]);
+  let [count, setCount] = useState(1);
+
+  let [age, setAge] = useState(20);
+
+  function 재고바꾸기() {
+    let newArray = [...재고];
+    newArray = [9, 10, 12];
+    재고변경(newArray);
+  }
+
+  useEffect(() => {
+    if (count != 0 && count < 3) {
+      setAge(age + 1);
+    }
+  }, [count]);
 
   return (
     <div className="App">
@@ -45,20 +68,18 @@ function App() {
         <Route exact path="/">
           <Jumbotron className="background">
             <h1>Yummy Dessert</h1>
-            <p>
-              This is a simple hero unit, a simple jumbotron-style component for
-              calling extra attention to featured content or information.
-            </p>
-            <p>
-              <Button variant="primary">Learn more</Button>
-            </p>
+            {/* <p>
+              <Button variant="primary">Read more</Button>
+            </p> */}
           </Jumbotron>
           <div className="container">
-            <div className="row">
-              {dessert.map((a, i) => {
-                return <Card dessert={a} i={i} key={i} />;
-              })}
-            </div>
+            <재고context.Provider value={재고}>
+              <div className="row">
+                {dessert.map((a, i) => {
+                  return <Card dessert={a} i={i} key={i} />;
+                })}
+              </div>
+            </재고context.Provider>
 
             {loading === true ? (
               <div>
@@ -66,31 +87,49 @@ function App() {
               </div>
             ) : null}
 
-            <button
-              className="btn btn-primary"
-              onClick={() => {
-                loading변경(true);
-                axios.post("서버URL", { id: "codingapple", pw: 1234 });
+            {count === 2 ? null : (
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  loading변경(true);
+                  axios.post("서버URL", { id: "codingapple", pw: 1234 });
 
-                axios
-                  .get("http://codingapple1.github.io/shop/data2.json")
-                  .then((result) => {
-                    loading변경(false);
-                    console.log(result.data);
-                    dessert변경([...dessert, ...result.data]);
-                  })
-                  .catch(() => {
-                    loading변경(false);
-                    console.log("실패");
-                  });
-              }}
-            >
-              더보기
-            </button>
+                  axios
+                    .get(
+                      "https://raw.githubusercontent.com/Lela12/shop-project/main/data2.json"
+                    )
+                    .then((result) => {
+                      loading변경(false);
+                      setCount(count + 1);
+                      console.log(result.data);
+                      dessert변경([...dessert, ...result.data]);
+                    })
+                    .catch(() => {
+                      loading변경(false);
+                      console.log("실패");
+                    });
+                }}
+              >
+                더보기
+              </button>
+            )}
           </div>
         </Route>
         <Route path="/detail/:id">
-          <Detail dessert={dessert} 재고={재고} 재고변경={재고변경} />
+          <재고context.Provider value={재고}>
+            <Suspense fallback={<div>로딩중이에요</div>}>
+              <Detail
+                dessert={dessert}
+                재고={재고}
+                재고변경={재고변경}
+                재고바꾸기={재고바꾸기}
+              />
+            </Suspense>
+          </재고context.Provider>
+        </Route>
+
+        <Route path="/cart">
+          <Cart></Cart>
         </Route>
 
         <Route path="/:id">
@@ -102,15 +141,29 @@ function App() {
 }
 
 function Card(props) {
+  let 재고 = useContext(재고context);
+  let history = useHistory();
+
   return (
-    <div className="col-md-4">
+    <div
+      className="col-md-4"
+      onClick={() => {
+        history.push("/detail/" + props.dessert.id);
+      }}
+    >
       <img src={"/assests/dessert" + (props.i + 1) + ".jpg"} width="100%" />
       <h4>{props.dessert.title}</h4>
       <p>
         {props.dessert.content} & {props.dessert.price}
       </p>
+      <Test></Test>
     </div>
   );
+}
+
+function Test() {
+  let 재고 = useContext(재고context);
+  return <p>{재고[0]}</p>;
 }
 
 export default App;
